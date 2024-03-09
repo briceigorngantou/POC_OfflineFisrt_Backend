@@ -20,18 +20,36 @@ def ApiOverview(request):
 
 
 @api_view(['POST'])
+def synch_data(request):
+    list_data = request.data
+    for value in list_data:
+        item = ProductSerializer(data=value)
+
+        # validating for already existing data
+        if Products.objects.filter(**value).exists():
+            raise serializers.ValidationError('This data already exists')
+
+        if item.is_valid():
+            item.save()
+        else:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+    return Response({"message": "Sucess"})
+
+
+@api_view(['POST'])
 def add_items(request):
-    item = ProductSerializer(data=request.data)
+    print(request.data)
+    # item = ProductSerializer(data=request.data)
 
-    # validating for already existing data
-    if Products.objects.filter(**request.data).exists():
-        raise serializers.ValidationError('This data already exists')
+    # # validating for already existing data
+    # if Products.objects.filter(**request.data).exists():
+    #     raise serializers.ValidationError('This data already exists')
 
-    if item.is_valid():
-        item.save()
-        return Response(item.data)
-    else:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+    # if item.is_valid():
+    #     item.save()
+    return Response(request.data)
+    # else:
+    #     return Response(status=status.HTTP_404_NOT_FOUND)
 
 
 @api_view(['GET'])
